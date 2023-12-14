@@ -15,14 +15,15 @@ class SpotifyController extends AbstractController
     {
         $envData = $this->getSpotifyAuthData();
         return $this->json([
-            'data' => $envData,
+            'spotify_client_id' => $envData['SPOTIFY_CLIENT_ID'],
+            'spotify_client_secret' => $envData['SPOTIFY_CLIENT_SECRET'],
         ]);
     }
 
     private function getSpotifyAuthData()
     {
         $dotenv = new Dotenv();
-        $dotenv->load($this->getParameter('kernel.project_dir').'/.env');
+        $dotenv->load($this->getParameter('kernel.project_dir').'/src/Controller/.env');
         $envData = [
             'SPOTIFY_CLIENT_ID' => $_ENV['SPOTIFY_CLIENT_ID'],
             'SPOTIFY_CLIENT_SECRET' => $_ENV['SPOTIFY_CLIENT_SECRET'],
