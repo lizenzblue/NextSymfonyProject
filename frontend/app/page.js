@@ -7,12 +7,31 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const urls = [
+        "http://127.0.0.1:8000/api/spotify/artist",
+        "http://127.0.0.1:44057/api/spotify/artist",
+      ];
+
+      const requests = urls.map(async (url) => {
+        try {
+          const response = await Promise.race([
+            fetch(url),
+            new Promise(
+              (_, reject) =>
+                setTimeout(() => reject(new Error("Timeout")), 5000) // 5 seconds timeout
+            ),
+          ]);
+          const result = await response.json();
+          setData(result);
+        } catch (error) {
+          console.error(`Error fetching data from ${url}:`, error);
+        }
+      });
+
       try {
-        const response = await fetch("http://127.0.0.1:8000/test");
-        const result = await response.json();
-        setData(result);
+        await Promise.all(requests);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Failed to fetch data from all URLs");
       }
     };
 
