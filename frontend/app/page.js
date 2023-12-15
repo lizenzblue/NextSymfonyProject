@@ -1,13 +1,18 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
+import { Navigation } from "../components/NavBar/page";
+import SearchBar from "../components/Searchbar/page";
 
 export default function Home() {
-  const [data, setData] = useState(null);
+  const [selectedTab, setSelectedTab] = useState("Artist");
+
+  const handleTabChange = (tab) => {
+    setSelectedTab(tab);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      const url = "http://127.0.0.1:8002/api/test";
+      const url = "http://127.0.0.1:8002/api/spotify/artist";
 
       try {
         const response = await Promise.race([
@@ -28,14 +33,8 @@ export default function Home() {
 
   return (
     <div>
-      {data ? (
-        <div>
-          <h1>{data.message}</h1>
-          <p>{data.path}</p>
-        </div>
-      ) : (
-        <p>Loading...</p>
-      )}
+      <Navigation selectedTab={selectedTab} onTabChange={handleTabChange} />
+      <SearchBar selectedTab={selectedTab} />
     </div>
   );
 }

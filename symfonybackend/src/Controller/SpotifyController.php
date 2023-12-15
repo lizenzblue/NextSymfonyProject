@@ -14,8 +14,10 @@ class SpotifyController extends AbstractController
     public function index(): Response
     {
         $envData = $this->getSpotifyAuthData();
+        $accessToken = $this->getAccessToken($envData);
+        
         return $this->json([
-            'spotify_client_id' => $envData['SPOTIFY_CLIENT_ID'],
+            'spotify_client_id' => $accessToken['access_token'],
             'spotify_client_secret' => $envData['SPOTIFY_CLIENT_SECRET'],
         ]);
     }
@@ -46,7 +48,6 @@ class SpotifyController extends AbstractController
                 'Content-Type' => 'application/x-www-form-urlencoded',
             ],
         ]);
-
         return json_decode($response->getBody(), true);
     }
 
@@ -115,15 +116,5 @@ class SpotifyController extends AbstractController
             }
         }
         return null;
-    }
-    
-    
-    
-    // This function checks what field the user wants to search for
-    private function checkWhatToSearchFor($data){
-        if($data["artist"] != "" && $data["album"] == ""){
-            return ["searchFor" => "artist", "artistName" => $data["artist"]];
-        }
-        return ["searchFor" => "album", "albumName" => $data["album"], "artistName" => $data["artist"]];
     }
 }
