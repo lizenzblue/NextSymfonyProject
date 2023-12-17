@@ -1,18 +1,18 @@
 "use client";
 import React, { useState } from "react";
 
-const SearchBar = ({ selectedTab }) => {
+const SearchBar = ({ selectedTab, onSearchQueryChange }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
+    const newSearchQuery = e.target.value;
+    setSearchQuery(newSearchQuery);
+    onSearchQueryChange(newSearchQuery);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // Add your search functionality here
-    console.log("Search query:", searchQuery);
   };
 
   const handleSearchFocus = () => {
@@ -36,8 +36,8 @@ const SearchBar = ({ selectedTab }) => {
           onChange={handleSearchChange}
           onFocus={handleSearchFocus}
           onBlur={handleSearchBlur}
-          className={`py-2 px-4 pr-10 bg-transparent rounded-full focus:outline-none focus:ring-0 ${
-            isSearchFocused ? "focus:border-green-500" : "border-white"
+          className={`py-2 px-4 pr-10 bg-transparent rounded-full focus:outline-none focus:ring-0 border border-white ${
+            isSearchFocused ? "focus:border-green-500" : ""
           } text-white`}
           style={{ caretColor: isSearchFocused ? "auto" : "transparent" }}
         />

@@ -2,12 +2,25 @@
 import React, { useState, useEffect } from "react";
 import { Navigation } from "../components/NavBar/page";
 import SearchBar from "../components/Searchbar/page";
+import ArtistDisplay from "../components/Artistdisplay/page";
 
 export default function Home() {
   const [selectedTab, setSelectedTab] = useState("Artist");
+  const [searchQuery, setSearchQuery] = useState(" ");
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab);
+  };
+
+  const handleSearchQueryChange = (query) => {
+    setSearchQuery(query);
+  };
+
+  let spotifyData = {
+    name: "Artist Name",
+    popularity: 0,
+    image: "/images/Spotify-Logo.svg.webp",
+    spotifyUrl: "https://open.spotify.com/",
   };
 
   useEffect(() => {
@@ -34,7 +47,15 @@ export default function Home() {
   return (
     <div>
       <Navigation selectedTab={selectedTab} onTabChange={handleTabChange} />
-      <SearchBar selectedTab={selectedTab} />
+      <SearchBar
+        selectedTab={selectedTab}
+        onSearchQueryChange={handleSearchQueryChange}
+      />
+      <ArtistDisplay artist={spotifyData} />
+      <div>
+        <h2>Search Query:</h2>
+        <p>{searchQuery}</p>
+      </div>
     </div>
   );
 }
