@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/symfonybackend/src" isTestSource="false" packagePrefix="App\" />
+      <sourceFolder url="file://$MODULE_DIR$/symfonybackend/tests" isTestSource="true" packagePrefix="App\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/temp" />
+      <excludeFolder url="file://$MODULE_DIR$/.tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/psr/http-client" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/psr/http-message" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/psr/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/psr/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/psr/log" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/nelmio/cors-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/cache-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/polyfill-mbstring" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/deprecation-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/runtime" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/routing" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/polyfill-php83" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/polyfill-intl-normalizer" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/polyfill-intl-grapheme" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/var-exporter" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/ralouphie/getallheaders" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/dependency-injection" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/config" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/event-dispatcher-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/error-handler" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/filesystem" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/guzzlehttp/promises" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/console" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/guzzlehttp/psr7" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/flex" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/guzzlehttp/guzzle" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/var-dumper" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/http-foundation" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/framework-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/http-kernel" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/service-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/string" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/psr/http-factory" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/dotenv" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/psr/container" />
+      <excludeFolder url="file://$MODULE_DIR$/symfonybackend/vendor/symfony/finder" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
