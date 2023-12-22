@@ -2,24 +2,22 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
 
-const ArtistDisplay = ({ artist }) => {
+const AlbumDisplay = ({ album }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { image, name, popularity, spotifyUrl, genres } = artist;
-  console.log(artist);
+  const { cover, name, spotify_url, release_date, artist } = album;
 
   const openModal = () => {
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    console.log("close");
     setIsModalOpen(false);
   };
 
   return (
     <>
       <a
-        href={spotifyUrl}
+        href={spotify_url}
         target="_blank"
         rel="noopener noreferrer"
         className="block bg-zinc-900 rounded-lg p-4 text-white w-60 mb-4 mx-4 mt-4 cursor-pointer"
@@ -30,16 +28,16 @@ const ArtistDisplay = ({ artist }) => {
       >
         <img
           className="rounded-full w-24 h-24 mx-auto mb-4"
-          src={image}
+          src={cover}
           alt={name}
         />
         <h2 className="text-center text-xl mb-2">{name}</h2>
-        <p className="text-center text-sm">Popularity: {popularity}</p>
+        <p className="text-center text-sm">: {popularity}</p>
       </a>
       <Modal
         isOpen={isModalOpen}
         onRequestClose={closeModal}
-        contentLabel="Artist Modal"
+        contentLabel="Album Modal"
         ariaHideApp={false}
         style={{
           overlay: {
@@ -63,7 +61,7 @@ const ArtistDisplay = ({ artist }) => {
           <div className="flex flex-col items-center mr-4">
             <img
               className="rounded-full w-64 h-64 shadow-md shadow-zinc-800"
-              src={image}
+              src={cover}
               alt={name}
             />
             <div className="mt-4">
@@ -72,19 +70,13 @@ const ArtistDisplay = ({ artist }) => {
             </div>
           </div>
           <div className="flex flex-col justify-center">
-            <p className="text-2xl text-white mb-4">Genres:</p>{" "}
-            <ul>
-              {genres !== undefined &&
-                genres.map((genre, index) => (
-                  <li key={index} className="text-2xl text-white mb-2">
-                    {genre}
-                  </li>
-                ))}
-            </ul>
+            <p className="text-2xl text-white mb-4">
+              Release Date: {release_date}
+            </p>{" "}
           </div>
         </div>
         <a
-          href={spotifyUrl}
+          href={spotify_url}
           target="_blank"
           rel="noopener noreferrer"
           className="text-2xl text-green-500 underline mb-4"
@@ -102,4 +94,4 @@ const ArtistDisplay = ({ artist }) => {
   );
 };
 
-export default ArtistDisplay;
+export default AlbumDisplay;

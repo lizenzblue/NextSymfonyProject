@@ -3,46 +3,61 @@ import React, { useState, useEffect } from "react";
 import { Navigation } from "../components/NavBar/page";
 import SearchBar from "../components/Searchbar/page";
 import ArtistDisplay from "../components/Artistdisplay/page";
+import axios from "axios";
+
+const debounce = (func, delay) => {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
 
 export default function Home() {
   const [selectedTab, setSelectedTab] = useState("Artist");
-  const [searchQuery, setSearchQuery] = useState(" ");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [apiResponse, setapiResponse] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+
+      try {
+        setapiResponse([]);
+
+        const response = await axios.get(
+          `http://127.0.0.1:8002/api/spotify?query=${searchQuery}&tab=${selectedTab}`
+        );
+
+        const newapiResponse = response.data?.apiResponse || [];
+
+        setapiResponse((prevData) => [...prevData, ...newapiResponse]);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (searchQuery) {
+      fetchData();
+    } else {
+      setapiResponse([]);
+      setError(null);
+    }
+  }, [searchQuery]);
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab);
   };
 
-  const handleSearchQueryChange = (query) => {
+  const handleSearchQueryChange = debounce(async (query) => {
     setSearchQuery(query);
-  };
-
-  let spotifyData = {
-    name: "Artist Name",
-    popularity: 0,
-    image: "/images/Spotify-Logo.svg.webp",
-    spotifyUrl: "https://open.spotify.com/",
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const url = "http://127.0.0.1:8002/api/spotify/artist";
-
-      try {
-        const response = await Promise.race([
-          fetch(url),
-          new Promise(
-            (_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000) // 5 seconds timeout
-          ),
-        ]);
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        console.error(`Error fetching data from ${url}:`, error);
-      }
-    };
-
-    fetchData();
-  }, []);
+  }, 380); // Adjust the delay
 
   return (
     <div>
@@ -51,11 +66,36 @@ export default function Home() {
         selectedTab={selectedTab}
         onSearchQueryChange={handleSearchQueryChange}
       />
-      <ArtistDisplay artist={spotifyData} />
-      <div>
-        <h2>Search Query:</h2>
-        <p>{searchQuery}</p>
-      </div>
+      {isLoading && (
+        <div role="status" className="flex items-center justify-center mt-20">
+          <svg
+            aria-hidden="true"
+            class="inline w-10 h-10text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+            viewBox="0 0 100 101"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+              fill="currentColor"
+            />
+            <path
+              d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+              fill="currentFill"
+            />
+          </svg>
+          <span class="sr-only">Loading...</span>
+        </div>
+      )}
+      {error && <p>Error: {error.message}</p>}
+      {apiResponse.length > 0 && (
+        <div className="flex flex-wrap justify-around">
+          {apiResponse.slice(0, 10).map((artist, index) => (
+            <ArtistDisplay key={index} artist={artist} />
+          ))}
+          {apiResponse.length % 3 === 1 && <div className="w-full"></div>}
+        </div>
+      )}
     </div>
   );
 }

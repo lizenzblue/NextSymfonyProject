@@ -7,18 +7,49 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use GuzzleHttp\Client;
 use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\HttpFoundation\Request;
 
 class SpotifyController extends AbstractController
 {
-    #[Route('/api/spotify/artist', name: 'spotifyArtist')]
-    public function index(): Response
+    #[Route('/api/spotify', name: 'spotify')]
+    public function index(Request $request): Response
     {
+
         $envData = $this->getSpotifyAuthData();
         $accessToken = $this->getAccessToken($envData);
-        
+
+        $searchQuery = $request->query->get('query', '');
+        $selectedTab = $request->query->get('tab', '');
+
+        $this->addFlash('search_query', $searchQuery);
+        $this->addFlash('selected_tab', $selectedTab);
+
+        /*$data = [
+            'searchFor' => $selectedTab,
+            'search_query' => $searchQuery,
+        ];*/
+
+        $data = [
+            'searchFor' => "Album",
+            'search_query' => "Days",
+        ];
+
+        $apiResponse = $this->callSpotifyAPI($accessToken, $data);
+
+        switch($data["searchFor"]){
+            case "Artist":
+                $artistData = $this->getArtistInfo($apiResponse, $data['search_query']);
+                break;
+            case "Album":
+                $artistData = $this->findAlbumByArtist($apiResponse, $data);
+                break;
+            case "Track":
+                $artistData = $this->findAlbumByArtist($apiResponse, $data);
+                break;
+        }
+
         return $this->json([
-            'spotify_client_id' => $accessToken['access_token'],
-            'spotify_client_secret' => $envData['SPOTIFY_CLIENT_SECRET'],
+            'artistData' => $artistData,
         ]);
     }
 
@@ -37,7 +68,6 @@ class SpotifyController extends AbstractController
     {
         $client = new Client();
 
-
         $response = $client->post('https://accounts.spotify.com/api/token', [
             'form_params' => [
                 'grant_type' => 'client_credentials',
@@ -55,10 +85,16 @@ class SpotifyController extends AbstractController
     {
         $client = new Client();
         $url = "";
-        if($data["searchFor"] == "artist"){
-            $url = 'https://api.spotify.com/v1/search?q=' . urlencode($data["artistName"]) . '&type=artist';
-        } else {
-            $url = 'https://api.spotify.com/v1/search?q=' . urlencode($data["albumName"]) . '&type=album';
+        switch($data["searchFor"]){
+            case "Artist":
+                $url = 'https://api.spotify.com/v1/search?q=' . $data["search_query"] . '&type=artist&limit=10';
+                break;
+            case "Album":
+                $url = 'https://api.spotify.com/v1/search?q=' . $data["search_query"] . '&type=album';
+                break;
+            case "Track":
+                $url = 'https://api.spotify.com/v1/search?q=' . $data["search_query"] . '&type=track';
+                break;
         }
        
         $response = $client->get($url, [
@@ -70,51 +106,62 @@ class SpotifyController extends AbstractController
         return json_decode($response->getBody(), true);
     }
 
-    public function getArtistInfo($artistsArray, $artistName)
+    private function getArtistInfo($artistsArray, $q)
     {
-        if (isset($artistsArray['artists']) && isset($artistsArray['artists']['items'][0])) {
-            foreach ($artistsArray['artists']['items'] as $artist) {
-                if (isset($artist['name']) && strcasecmp($artist['name'], $artistName) === 0) {
-                    $image = $artist['images'][0]['url'] ?? '';
-                    $name = $artist['name'] ?? '';
-                    $popularity = $artist['popularity'] ?? 0;
-                    $spotifyUrl = $artist['external_urls']['spotify'] ?? '';
-
-                    return [
-                        'image' => $image,
-                        'name' => $name,
-                        'popularity' => $popularity,
-                        'spotifyUrl' => $spotifyUrl,
-                    ];
-                }
+        $artistData = [];
+        foreach ($artistsArray['artists']['items'] as $artist) {
+            $image = $artist['images'][0]['url'] ?? '';
+            $name = $artist['name'] ?? '';
+            $popularity = $artist['popularity'] ?? 0;
+            $spotifyUrl = $artist['external_urls']['spotify'] ?? '';
+            $genres = $artist['genres'] ?? [];
+            if(str_contains(strtolower($name), strtolower($q))){
+                $artistData[] = [
+                    'image' => $image,
+                    'name' => $name,
+                    'popularity' => $popularity,
+                    'spotifyUrl' => $spotifyUrl,
+                    'genres' => $genres,
+                ];
             }
         }
+        $artistData = $this->checkIfArrayContainsArtist($artistData);
+        return $artistData;
+    }
 
-        return null;
+
+    private function checkIfArrayContainsArtist($artistData)
+    {
+        $uniqueArtists = [];
+    
+        foreach ($artistData as $artist) {
+            $name = $artist['name'];
+            
+            if (!isset($uniqueArtists[$name])) {
+                $uniqueArtists[$name] = $artist;
+            }
+        }
+        
+        return array_values($uniqueArtists);
     }
 
     private function findAlbumByArtist($apiResponse, $data)
     {
+        $albumDetails = [];
         foreach ($apiResponse['albums']['items'] as $album) {
             $albumArtistName = $album['artists'][0]['name'];
-
-            if(!empty($data['artistName'])){
-                if ($albumArtistName == $data['artistName']) {
-                    $albumDetails = [
-                        'title' => $album['name'],
-                        'artist' => $albumArtistName,
-                        'album_type' => $album['album_type'],
-                        'release_date' => $album['release_date'],
-                        'spotify_url' => $album['external_urls']['spotify'],
-                        'cover' => isset($album['images'][0]['url']) ? $album['images'][0]['url'] : null,
-                        'available_markets' => $album['available_markets'],
-                    ];
-        
-                    return $albumDetails;
-                }
-                continue;
-            }
+            $albumDetails[] = [
+                'name' => $album['name'],
+                'artist' => $albumArtistName,
+                'album_type' => $album['album_type'],
+                'release_date' => $album['release_date'],
+                'spotify_url' => $album['external_urls']['spotify'],
+                'cover' => isset($album['images'][0]['url']) ? $album['images'][0]['url'] : null,
+                'available_markets' => $album['available_markets'],
+            ];
+            
         }
-        return null;
+        var_dump($albumDetails);
+        return $albumDetails;
     }
 }
