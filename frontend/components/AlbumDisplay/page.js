@@ -6,6 +6,8 @@ const AlbumDisplay = ({ album }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { cover, name, spotify_url, release_date, artist } = album;
 
+  console.log(album);
+
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -32,7 +34,6 @@ const AlbumDisplay = ({ album }) => {
           alt={name}
         />
         <h2 className="text-center text-xl mb-2">{name}</h2>
-        <p className="text-center text-sm">: {popularity}</p>
       </a>
       <Modal
         isOpen={isModalOpen}
@@ -66,7 +67,6 @@ const AlbumDisplay = ({ album }) => {
             />
             <div className="mt-4">
               <h2 className="text-4xl text-white mb-2">{name}</h2>{" "}
-              <p className="text-2xl text-white">Popularity: {popularity}</p>{" "}
             </div>
           </div>
           <div className="flex flex-col justify-center">

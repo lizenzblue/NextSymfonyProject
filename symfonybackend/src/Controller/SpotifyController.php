@@ -24,32 +24,31 @@ class SpotifyController extends AbstractController
         $this->addFlash('search_query', $searchQuery);
         $this->addFlash('selected_tab', $selectedTab);
 
-        /*$data = [
+        $data = [
             'searchFor' => $selectedTab,
             'search_query' => $searchQuery,
-        ];*/
-
-        $data = [
-            'searchFor' => "Album",
-            'search_query' => "Days",
         ];
 
-        $apiResponse = $this->callSpotifyAPI($accessToken, $data);
+        /*$data = [
+            'searchFor' => "Artist",
+            'search_query' => "edo",
+        ];*/
 
+        $apiResponse = $this->callSpotifyAPI($accessToken, $data);
+        $returnData = null;
         switch($data["searchFor"]){
             case "Artist":
-                $artistData = $this->getArtistInfo($apiResponse, $data['search_query']);
+                $returnData = $this->getArtistInfo($apiResponse, $data['search_query']);
                 break;
             case "Album":
-                $artistData = $this->findAlbumByArtist($apiResponse, $data);
+                $returnData = $this->getAlbumInfo($apiResponse, $data['search_query']);
                 break;
-            case "Track":
-                $artistData = $this->findAlbumByArtist($apiResponse, $data);
+            case "Tracks":
+                $returnData = $this->getTrackInfo($apiResponse, $data['search_query']);
                 break;
         }
-
         return $this->json([
-            'artistData' => $artistData,
+            'returnData' => $returnData,
         ]);
     }
 
@@ -90,10 +89,10 @@ class SpotifyController extends AbstractController
                 $url = 'https://api.spotify.com/v1/search?q=' . $data["search_query"] . '&type=artist&limit=10';
                 break;
             case "Album":
-                $url = 'https://api.spotify.com/v1/search?q=' . $data["search_query"] . '&type=album';
+                $url = 'https://api.spotify.com/v1/search?q=' . $data["search_query"] . '&type=album&limit=10';
                 break;
-            case "Track":
-                $url = 'https://api.spotify.com/v1/search?q=' . $data["search_query"] . '&type=track';
+            case "Tracks":
+                $url = 'https://api.spotify.com/v1/search?q=' . $data["search_query"] . '&type=track&limit=10';
                 break;
         }
        
@@ -106,9 +105,35 @@ class SpotifyController extends AbstractController
         return json_decode($response->getBody(), true);
     }
 
+    private function checkIfArrayContainsDoubles($data)
+    {
+        $uniqueData = [];
+
+        foreach ($data as $key => $item) {
+            if($key == 'type'){
+                continue;
+            }
+            if($data['type'] == 'artist'){
+                $name = $item['name'];
+            } else if($data['type'] == 'album'){
+                $name = $item['name'];
+            } else if($data['type'] == 'track'){
+                $name = $item['name'];
+            }
+            
+            if (!isset($uniqueData[$name])) {
+                $uniqueData[$name] = $item;
+            }
+        }
+        
+        return array_values($uniqueData);
+    }
+
     private function getArtistInfo($artistsArray, $q)
     {
-        $artistData = [];
+        $artistData = [
+            'type' => 'artist',
+        ];
         foreach ($artistsArray['artists']['items'] as $artist) {
             $image = $artist['images'][0]['url'] ?? '';
             $name = $artist['name'] ?? '';
@@ -125,43 +150,53 @@ class SpotifyController extends AbstractController
                 ];
             }
         }
-        $artistData = $this->checkIfArrayContainsArtist($artistData);
+        $artistData = $this->checkIfArrayContainsDoubles($artistData);
         return $artistData;
     }
 
-
-    private function checkIfArrayContainsArtist($artistData)
+    private function getAlbumInfo($apiResponse, $q)
     {
-        $uniqueArtists = [];
-    
-        foreach ($artistData as $artist) {
-            $name = $artist['name'];
-            
-            if (!isset($uniqueArtists[$name])) {
-                $uniqueArtists[$name] = $artist;
+        $albumDetails = [
+            'type' => 'album',
+        ];
+        foreach ($apiResponse['albums']['items'] as $album) {
+            if(str_contains(strtolower($album['name']), strtolower($q))){
+                $albumArtistName = $album['artists'][0]['name'];
+                $albumDetails[] = [
+                    'name' => $album['name'],
+                    'artist' => $albumArtistName,
+                    'album_type' => $album['album_type'],
+                    'release_date' => $album['release_date'],
+                    'spotify_url' => $album['external_urls']['spotify'],
+                    'cover' => isset($album['images'][0]['url']) ? $album['images'][0]['url'] : null,
+                    'available_markets' => $album['available_markets'],
+                ];
             }
         }
-        
-        return array_values($uniqueArtists);
+        $albumDetails = $this->checkIfArrayContainsDoubles($albumDetails);
+        return $albumDetails;
     }
 
-    private function findAlbumByArtist($apiResponse, $data)
+    private function getTrackInfo($apiResponse, $q)
     {
-        $albumDetails = [];
-        foreach ($apiResponse['albums']['items'] as $album) {
-            $albumArtistName = $album['artists'][0]['name'];
-            $albumDetails[] = [
-                'name' => $album['name'],
-                'artist' => $albumArtistName,
-                'album_type' => $album['album_type'],
-                'release_date' => $album['release_date'],
-                'spotify_url' => $album['external_urls']['spotify'],
-                'cover' => isset($album['images'][0]['url']) ? $album['images'][0]['url'] : null,
-                'available_markets' => $album['available_markets'],
-            ];
-            
+        $trackDetails = [
+            'type' => 'track',
+        ];
+        foreach ($apiResponse['tracks']['items'] as $track) {
+            if(str_contains(strtolower($track['name']), strtolower($q))){
+                $trackDetails[] = [
+                    'name' => $track['name'],
+                    'artist' => $track['artists'][0]['name'],
+                    'album' => $track['album']['name'],
+                    'spotify_url' => $track['external_urls']['spotify'],
+                    'cover' => isset($track['album']['images'][0]['url']) ? $track['album']['images'][0]['url'] : null,
+                    'preview_url' => $track['preview_url'],
+                ];
+            }
         }
-        var_dump($albumDetails);
-        return $albumDetails;
+
+        $trackDetails = $this->checkIfArrayContainsDoubles($trackDetails);
+        dd($trackDetails);
+        return $trackDetails;
     }
 }

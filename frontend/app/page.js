@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Navigation } from "../components/NavBar/page";
 import SearchBar from "../components/Searchbar/page";
 import ArtistDisplay from "../components/Artistdisplay/page";
+import AlbumDisplay from "@/components/AlbumDisplay/page";
 import axios from "axios";
 
 const debounce = (func, delay) => {
@@ -25,16 +26,12 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-
       try {
         setapiResponse([]);
-
-        const response = await axios.get(
-          `http://127.0.0.1:8002/api/spotify?query=${searchQuery}&tab=${selectedTab}`
-        );
-
-        const newapiResponse = response.data?.apiResponse || [];
-
+        let url = `http://localhost:8002/api/spotify?query=${searchQuery}&tab=${selectedTab}`;
+        console.log(url);
+        const response = await axios.get(url);
+        const newapiResponse = response.data?.returnData || [];
         setapiResponse((prevData) => [...prevData, ...newapiResponse]);
       } catch (error) {
         setError(error);
@@ -53,6 +50,8 @@ export default function Home() {
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab);
+    setSearchQuery("");
+    setapiResponse([]);
   };
 
   const handleSearchQueryChange = debounce(async (query) => {
@@ -70,7 +69,7 @@ export default function Home() {
         <div role="status" className="flex items-center justify-center mt-20">
           <svg
             aria-hidden="true"
-            class="inline w-10 h-10text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+            className="inline w-10 h-10text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
             viewBox="0 0 100 101"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -84,14 +83,23 @@ export default function Home() {
               fill="currentFill"
             />
           </svg>
-          <span class="sr-only">Loading...</span>
+          <span className="sr-only">Loading...</span>
         </div>
       )}
       {error && <p>Error: {error.message}</p>}
-      {apiResponse.length > 0 && (
+      {selectedTab === "Artist" && apiResponse.length > 0 && (
         <div className="flex flex-wrap justify-around">
           {apiResponse.slice(0, 10).map((artist, index) => (
             <ArtistDisplay key={index} artist={artist} />
+          ))}
+          {apiResponse.length % 3 === 1 && <div className="w-full"></div>}
+        </div>
+      )}
+
+      {selectedTab === "Album" && apiResponse.length > 0 && (
+        <div className="flex flex-wrap justify-around">
+          {apiResponse.slice(0, 10).map((album, index) => (
+            <AlbumDisplay key={index} album={album} />
           ))}
           {apiResponse.length % 3 === 1 && <div className="w-full"></div>}
         </div>
