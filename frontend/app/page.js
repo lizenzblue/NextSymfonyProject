@@ -29,7 +29,6 @@ export default function Home() {
       try {
         setapiResponse([]);
         let url = `http://localhost:8002/api/spotify?query=${searchQuery}&tab=${selectedTab}`;
-        console.log(url);
         const response = await axios.get(url);
         const newapiResponse = response.data?.returnData || [];
         setapiResponse((prevData) => [...prevData, ...newapiResponse]);
