@@ -15,10 +15,12 @@ class RegisterController extends AbstractController
    #[Route('/api/register', name: 'register')]
    public function register(Request $request, EntityManagerInterface $entityManagerInterface, UserPasswordHasherInterface $passwordHasher): Response
    {
-      $requestData = $request->get('submit');
-      $username = strval($request->request->get('username'));
-      $email = strval($request->request->get('email'));
-      $password = strval($request->request->get('password'));
+      $requestData = json_decode($request->getContent(), true);
+      $email = strval($requestData['email']);
+      $username = strval($requestData['username']);
+      $password = strval($requestData['password']);
+      $sessionID = strval(uniqid());
+
       if (isset($requestData)) {
          $user = new User();
          $hashedpwd = $passwordHasher->hashPassword($user, $password);
@@ -26,9 +28,13 @@ class RegisterController extends AbstractController
          $user->setEmail($email);
          $user->setPassword($hashedpwd);
          $user->setRoles(['ROLE_USER']);
+         $user->setSessionID($sessionID);
          $entityManagerInterface->persist($user);
          $entityManagerInterface->flush();
       }
-      return $this->render('register/registerPage.html.twig');
+      return $this->json([
+         'message' => 'User registered successfully',
+         'sessionID' => $sessionID,
+      ]);
    }
 }
